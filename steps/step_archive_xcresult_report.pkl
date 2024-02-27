@@ -1,0 +1,7 @@
+amends "step_archive_failure_artifact.pkl"
+
+name = "Archiving XCResult report"
+with {
+    name = "xcresult-report"
+    path = "/Users/runner/Library/Developer/Xcode/DerivedData/Zenjob-*/Logs/Test/*.xcresult"
+}

@@ -1,0 +1,25 @@
+amends "src/WorkflowTemplate.pkl"
+
+shouldRunLintChecks = true
+shouldArchiveFailureArtifacts = true
+workflow_step = import("src/RunUnitTests.pkl")
+
+name = "Update on main"
+
+env {
+    SOMETHING_ELSE = "that needs to go here"
+}
+
+on {
+    push {
+        branches {
+            "main"
+        }
+    }
+}
+
+jobs {
+    main {
+        name = "Run unit tests"
+    }
+}

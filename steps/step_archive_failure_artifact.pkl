@@ -1,0 +1,7 @@
+name = "Archiving failure artifact"
+`if` = "failure()"
+uses = "actions/upload-artifact@v3"
+with {
+  name = "artifact-report"
+  path = "artifact-path"
+}

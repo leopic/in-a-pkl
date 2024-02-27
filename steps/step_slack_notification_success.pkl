@@ -1,0 +1,9 @@
+amends "step_slack_notification.pkl"
+
+name = "Notify slack success"
+id = null
+with {
+    color = "good"
+    status = "SUCCESS"
+    message_id = "${{ steps.slack.outputs.message_id }}"
+}

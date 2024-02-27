@@ -1,0 +1,11 @@
+extends "WorkflowStep.pkl"
+
+step = new WorkflowStep {
+    name = "Run Unit Tests"
+    `if` = "steps.filter.outputs.code == 'true' || steps.filter.outputs.scripts == 'true' || steps.filter.outputs.dependencies == 'true'"
+    run = "fastlane tests"
+    env {
+        `ssh-private-key` = "${{ secrets.SSH_PRIVATE_KEY }}"
+        FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT = 120
+    }
+}

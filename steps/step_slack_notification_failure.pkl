@@ -1,0 +1,10 @@
+amends "step_slack_notification.pkl"
+
+name = "Notify slack failure"
+`if` = "failure()"
+id = null
+with {
+    color = "danger"
+    status = "FAILED"
+    message_id = "${{ steps.slack.outputs.message_id }}"
+}

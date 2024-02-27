@@ -1,0 +1,7 @@
+amends "step_archive_failure_artifact.pkl"
+
+name = "Archiving HTML report"
+with {
+    name = "html-report"
+    path = "/Users/runner/work/zenjob-ios/zenjob-ios/fastlane/test_output/report.html"
+}

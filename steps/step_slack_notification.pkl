@@ -1,0 +1,12 @@
+name = "Notify slack pipeline started"
+`if` = "success()"
+id = "slack"
+env {
+  SLACK_BOT_TOKEN = "${{ secrets.SLACK_BOT_TOKEN }}"
+}
+uses = "voxmedia/github-action-slack-notify-build@v1"
+with {
+  channel = "dev-ios"
+  status = "STARTING"
+  color = "warning"
+}

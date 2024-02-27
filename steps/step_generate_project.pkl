@@ -1,0 +1,7 @@
+name  = "Generate Project"
+`if` = "steps.filter.outputs.code == 'true' || steps.filter.outputs.scripts == 'true' || steps.filter.outputs.dependencies == 'true'"
+env {
+    `ssh-private-key` = "${{ secrets.SSH_PRIVATE_KEY }}"
+    VENDOR_ACCESS_TOKEN = "${{ secrets.VENDOR_ACCESS_TOKEN }}"
+}
+run = "./generate-project"

@@ -1,0 +1,89 @@
+name: Update on main
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  TUIST_VERSION: "2.1.1"
+
+jobs:
+  Main:
+    name: Build
+    runs-on: macOS-13
+    steps:
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "15.1"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Paths filtering
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: .github/filters.yaml
+      - name: Notify slack pipeline started
+        id: slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: dev-ios
+          status: STARTING
+          color: warning
+      - name: Run SwiftLint
+        if: steps.filter.outputs.code == 'true'
+        run: swiftlint lint --reporter github-actions-logging
+      - name: Generate Project
+        if: steps.filter.outputs.code == 'true' || steps.filter.outputs.scripts == 'true' || steps.filter.outputs.dependencies == 'true'
+        env:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          VENDOR_ACCESS_TOKEN: ${{ secrets.VENDOR_ACCESS_TOKEN }}
+        run: |
+          ./generate-project
+      - name: Run Unit Tests
+        if: steps.filter.outputs.code == 'true' || steps.filter.outputs.scripts == 'true' || steps.filter.outputs.dependencies == 'true'
+        run: fastlane tests
+        env:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
+      - name: Archiving xcresult report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: xcresult-report
+          path: /Users/runner/Library/Developer/Xcode/DerivedData/Zenjob-*/Logs/Test/*.xcresult
+      - name: Archiving junit report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-report
+          path: /Users/runner/work/zenjob-ios/zenjob-ios/fastlane/test_output/report.junit
+      - name: Archiving htlm report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-report
+          path: /Users/runner/work/zenjob-ios/zenjob-ios/fastlane/test_output/report.html
+      - name: Notify slack success
+        if: success()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          message_id: ${{ steps.slack.outputs.message_id }}
+          channel: dev-ios
+          status: SUCCESS
+          color: good
+      - name: Notify slack failure
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          message_id: ${{ steps.slack.outputs.message_id }}
+          channel: dev-ios
+          status: FAILED
+          color: danger

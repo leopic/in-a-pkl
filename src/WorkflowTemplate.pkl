@@ -1,0 +1,58 @@
+import "WorkflowStep.pkl"
+
+hidden step_setup_xcode = import("../steps/step_setup_xcode.pkl")
+hidden step_checkout = import("../steps/step_checkout.pkl")
+hidden step_paths_filtering = import("../steps/step_paths_filtering.pkl")
+hidden step_setup_ssh = import("../steps/step_setup_ssh.pkl")
+hidden step_slack_notification = import("../steps/step_slack_notification.pkl")
+hidden step_run_swiftlint = import("../steps/step_run_swiftlint.pkl")
+hidden step_generate_project = import("../steps/step_generate_project.pkl")
+
+hidden step_archive_xcresult_report = import("../steps/step_archive_xcresult_report.pkl")
+hidden step_archive_junit_report = import("../steps/step_archive_junit_report.pkl")
+hidden step_archive_html_report = import("../steps/step_archive_html_report.pkl")
+hidden step_slack_notification_success = import("../steps/step_slack_notification_success.pkl")
+hidden step_slack_notification_failure = import("../steps/step_slack_notification_failure.pkl")
+
+hidden shouldArchiveFailureArtifacts = false
+hidden shouldRunLintChecks = false
+hidden workflow_step: WorkflowStep?
+
+name: String
+
+on {}
+
+env {
+    TUIST_VERSION = "2.1.1"
+}
+
+jobs {
+    main {
+        name = "Build"
+        `runs-on` = "macOS-13"
+        
+        steps {
+            step_setup_xcode
+            step_checkout
+            step_paths_filtering
+            step_slack_notification
+
+            when (shouldRunLintChecks) {
+                step_run_swiftlint
+            }
+
+            step_generate_project
+
+            workflow_step?.step ?? throw("Workflow step is missing")
+
+            when (shouldArchiveFailureArtifacts) {
+                step_archive_xcresult_report
+                step_archive_junit_report
+                step_archive_html_report
+            }
+
+            step_slack_notification_success
+            step_slack_notification_failure
+        }
+    }
+}

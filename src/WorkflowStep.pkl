@@ -1,0 +1,12 @@
+open module WorkflowStep
+
+class WorkflowStep {
+    name: String
+    run: String
+    `if`: String?
+    env: Any?
+    with: Any?
+    uses: String?
+    id: String?
+    `continue-on-error`: Boolean?
+}
